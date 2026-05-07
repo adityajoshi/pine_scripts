@@ -1,0 +1,34 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © adityajoshi
+
+//@version=6
+indicator("Dashboard", overlay = true)
+
+// --- Inputs ---
+rsiLength = input.int(14, "RSI Length", minval = 1)
+rsiSource = input.source(close, "Source")
+tablePos  = input.string(position.top_right, "Table Position", 
+             options = [position.top_right, position.bottom_right, position.top_left, position.bottom_left])
+
+// --- Calculations ---
+rsiValue = ta.rsi(rsiSource, rsiLength)
+
+// --- Table Logic ---
+var table dashboard = table.new(tablePos, 2, 2, 
+     frame_color = color.gray, 
+     frame_width = 1, 
+     border_color = color.gray, 
+     border_width = 1)
+
+// Update table only on the last bar to save resources
+if barstate.islast
+    // Header
+    table.cell(dashboard, 0, 0, "Ticker",     bgcolor = color.new(color.gray, 70), text_color = color.white)
+    table.cell(dashboard, 1, 0, "RSI (" + str.tostring(rsiLength) + ")", bgcolor = color.new(color.gray, 70), text_color = color.white)
+    
+    // Data
+    table.cell(dashboard, 0, 1, syminfo.ticker, bgcolor = color.new(color.black, 20), text_color = color.white)
+    
+    // Dynamic color coding for RSI levels
+    color rsiColor = rsiValue >= 70 ? color.red : rsiValue <= 30 ? color.green : color.white
+    table.cell(dashboard, 1, 1, str.tostring(rsiValue, "#.##"), bgcolor = color.new(color.black, 20), text_color = rsiColor)
